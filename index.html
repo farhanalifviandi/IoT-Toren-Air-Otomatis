@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Toren Air</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white text-center">
+                <h1>Data Toren Air</h1>
+            </div>
+            <div class="card-body">
+                <p class="h4">Water Level: <span id="water-level" class="fw-bold text-primary">Loading...</span> cm</p>
+                <p class="h4">Flow Rate: <span id="flow-rate" class="fw-bold text-success">Loading...</span> L/min</p>
+                <p class="h4">Total Liters: <span id="total-liters" class="fw-bold text-danger">Loading...</span> L</p>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <h2>Log Data (Pompa Menyala)</h2>
+            <table class="table table-striped table-hover table-bordered table-sm text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Water Level (cm)</th>
+                        <th>Flow Rate (L/min)</th>
+                        <th>Total Liters (L)</th>
+                        <th>Pump Status</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="log-data">
+                    <!-- Data akan diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function updateSensorData() {
+            $.get("api.php", function(data) {
+                // Update elemen-elemen di halaman dengan data dari server
+                const sensorData = JSON.parse(data);
+                $('#water-level').text(sensorData.waterLevel);
+                $('#flow-rate').text(sensorData.flowRate);
+                $('#total-liters').text(sensorData.totalLiters);
+            });
+        }
+
+        function fetchLogData() {
+            $.get("fetch_logs.php", function(data) {
+                // Parse data dan tampilkan di tabel
+                const logs = JSON.parse(data);
+                const logTable = $("#log-data");
+                logTable.empty();
+                logs.forEach((log, index) => {
+                    logTable.append(`
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${log.water_level}</td>
+                            <td>${log.flow_rate}</td>
+                            <td>${log.total_liters}</td>
+                            <td>${log.pump_status}</td>
+                            <td>${log.TIMESTAMP}</td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        // Update data sensor setiap 1 detik
+        setInterval(updateSensorData, 1000);
+
+        // Fetch log data setiap 2 detik
+        setInterval(fetchLogData, 2000);
+    </script>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
